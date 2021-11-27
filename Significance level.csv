@@ -1,0 +1,101 @@
+,X,Y,cor,X_lab,Y_lab,round,label
+1,1,1,1,Gender,Gender,1,1
+2,1,2,,Gender,Age,,
+3,1,3,,Gender,Ethnic group,,
+4,1,4,,Gender,Residence,,
+5,1,5,,Gender,Economic status,,
+6,1,6,,Gender,Social class,,
+7,1,7,,Gender,Media preference,,
+8,1,8,,Gender,PES activities,,
+9,1,9,,Gender,PES attitudes,,
+10,1,10,,Gender,SIL,,
+11,2,1,0.042866555,Age,Gender,0.04,0.04**
+12,2,2,,Age,Age,,
+13,2,3,,Age,Ethnic group,,
+14,2,4,,Age,Residence,,
+15,2,5,,Age,Economic status,,
+16,2,6,,Age,Social class,,
+17,2,7,,Age,Media preference,,
+18,2,8,,Age,PES activities,,
+19,2,9,,Age,PES attitudes,,
+20,2,10,,Age,SIL,,
+21,3,1,0.049061766,Ethnic group,Gender,0.05,0.05**
+22,3,2,0.056987845,Ethnic group,Age,0.06,0.06**
+23,3,3,,Ethnic group,Ethnic group,,
+24,3,4,,Ethnic group,Residence,,
+25,3,5,,Ethnic group,Economic status,,
+26,3,6,,Ethnic group,Social class,,
+27,3,7,,Ethnic group,Media preference,,
+28,3,8,,Ethnic group,PES activities,,
+29,3,9,,Ethnic group,PES attitudes,,
+30,3,10,,Ethnic group,SIL,,
+31,4,1,0.011116756,Residence,Gender,0.01,0.01
+32,4,2,0.098649132,Residence,Age,0.1,0.10**
+33,4,3,0.000558009,Residence,Ethnic group,0,0.00
+34,4,4,,Residence,Residence,,
+35,4,5,,Residence,Economic status,,
+36,4,6,,Residence,Social class,,
+37,4,7,,Residence,Media preference,,
+38,4,8,,Residence,PES activities,,
+39,4,9,,Residence,PES attitudes,,
+40,4,10,,Residence,SIL,,
+41,5,1,0.016456481,Economic status,Gender,0.02,0.02
+42,5,2,0.053071659,Economic status,Age,0.05,0.05**
+43,5,3,-0.024866143,Economic status,Ethnic group,-0.02,-0.02*
+44,5,4,0.328017236,Economic status,Residence,0.33,0.33**
+45,5,5,,Economic status,Economic status,,
+46,5,6,,Economic status,Social class,,
+47,5,7,,Economic status,Media preference,,
+48,5,8,,Economic status,PES activities,,
+49,5,9,,Economic status,PES attitudes,,
+50,5,10,,Economic status,SIL,,
+51,6,1,0.024506596,Social class,Gender,0.03,0.03*
+52,6,2,0.011429821,Social class,Age,0.01,0.01
+53,6,3,0.036016315,Social class,Ethnic group,0.04,0.04**
+54,6,4,-0.231060025,Social class,Residence,-0.23,-0.23**
+55,6,5,-0.377403214,Social class,Economic status,-0.38,-0.38**
+56,6,6,,Social class,Social class,,
+57,6,7,,Social class,Media preference,,
+58,6,8,,Social class,PES activities,,
+59,6,9,,Social class,PES attitudes,,
+60,6,10,,Social class,SIL,,
+61,7,1,-0.015817728,Media preference,Gender,-0.02,-0.02
+62,7,2,0.033298409,Media preference,Age,0.03,0.03**
+63,7,3,0.027884756,Media preference,Ethnic group,0.03,0.03*
+64,7,4,0.03486892,Media preference,Residence,0.03,0.03**
+65,7,5,0.060983446,Media preference,Economic status,0.06,0.06**
+66,7,6,-0.063235367,Media preference,Social class,-0.06,-0.06**
+67,7,7,,Media preference,Media preference,,
+68,7,8,,Media preference,PES activities,,
+69,7,9,,Media preference,PES attitudes,,
+70,7,10,,Media preference,SIL,,
+71,8,1,0.134015676,PES activities,Gender,0.13,0.13**
+72,8,2,0.161339137,PES activities,Age,0.16,0.16**
+73,8,3,0.040495515,PES activities,Ethnic group,0.04,0.04**
+74,8,4,-0.021098023,PES activities,Residence,-0.02,-0.02
+75,8,5,-0.023497765,PES activities,Economic status,-0.02,-0.02*
+76,8,6,0.106285008,PES activities,Social class,0.11,0.11**
+77,8,7,-0.155406586,PES activities,Media preference,-0.16,-0.16**
+78,8,8,,PES activities,PES activities,,
+79,8,9,,PES activities,PES attitudes,,
+80,8,10,,PES activities,SIL,,
+81,9,1,0.009102806,PES attitudes,Gender,0.01,0.01
+82,9,2,0.025758398,PES attitudes,Age,0.03,0.03*
+83,9,3,0.045398104,PES attitudes,Ethnic group,0.05,0.05**
+84,9,4,0.017203627,PES attitudes,Residence,0.02,0.02
+85,9,5,-0.008170283,PES attitudes,Economic status,-0.01,-0.01
+86,9,6,0.063432897,PES attitudes,Social class,0.06,0.06**
+87,9,7,-0.025290672,PES attitudes,Media preference,-0.03,-0.03*
+88,9,8,0.283259804,PES attitudes,PES activities,0.28,0.28**
+89,9,9,,PES attitudes,PES attitudes,,
+90,9,10,,PES attitudes,SIL,,
+91,10,1,0.099103475,SIL,Gender,0.1,0.10**
+92,10,2,0.027963145,SIL,Age,0.03,0.03*
+93,10,3,0.037082621,SIL,Ethnic group,0.04,0.04**
+94,10,4,-0.011574102,SIL,Residence,-0.01,-0.01
+95,10,5,-0.029010092,SIL,Economic status,-0.03,-0.03**
+96,10,6,0.035349443,SIL,Social class,0.04,0.04**
+97,10,7,0.036441128,SIL,Media preference,0.04,0.04**
+98,10,8,0.18183943,SIL,PES activities,0.18,0.18**
+99,10,9,0.328714681,SIL,PES attitudes,0.33,0.33**
+100,10,10,,SIL,SIL,,

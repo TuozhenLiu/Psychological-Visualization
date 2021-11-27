@@ -1,0 +1,271 @@
+---
+title: "Untitled"
+author: "Tuozhen_liu"
+date: "6/6/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# 加载包
+```{r}
+library(haven)
+library(dplyr)
+library(stringr)
+library(purrr)
+library(ggplot2)
+library(sf)
+```
+
+# 读取数据
+```{r}
+df <- read_sav('data_clean_fresh_all_9490_ltz.sav')
+df <- df %>%
+  rename(ethnic = nationality, singlechild = Q9)
+```
+
+# 1 从birthplace提取省份，存至birthplace2
+```{r}
+df <- df %>%
+  mutate(birthplace2 = map_chr(birthplace, 
+                               ~ifelse(str_detect(.x, '-'), 
+                                       str_extract(.x, '.*?(?=-)'), .x))) %>%
+  mutate(birthplace2 = case_when(birthplace2 == '黑龙' ~ '黑龙江',
+                                 birthplace2 == '内蒙' ~ '内蒙古',
+                                 TRUE ~ birthplace2))
+```
+
+
+# 2 计算Mcomply各省均值，存至Mcomply_avg
+```{r}
+df %<>%
+  group_by(birthplace2) %>%
+  mutate(Mcomply_avg = mean(Mcomply, na.rm = T), .after = 'Mcomply')
+```
+
+# 3 地图
+```{r}
+## 加载地图包
+china_map <- readRDS("~/Nutstore Files/gitt/地图/gadm36_CHN_1_sf.rds")
+hk <- readRDS("~/Nutstore Files/gitt/地图/gadm36_HKG_0_sf.rds")
+mc <- readRDS("~/Nutstore Files/gitt/地图/gadm36_MAC_0_sf.rds")
+tw <-readRDS("~/Nutstore Files/gitt/地图/gadm36_TWN_0_sf.rds")
+china_map <- bind_rows(china_map, hk, mc, tw)
+## 压缩
+china_map <- rmapshaper::ms_simplify(china_map)
+## 整理数据
+df %>%
+  distinct(birthplace2, Mcomply_avg) %>%
+  filter(!is.na(birthplace2), birthplace2 != '海外') -> temp
+temp %>% 
+  filter(! birthplace2 %in% c('香港', '澳门', '台湾')) %>% 
+  arrange(birthplace2) %>%
+  bind_rows(temp %>% filter(birthplace2 == '香港'), 
+            temp %>% filter(birthplace2 == '澳门'), 
+            temp %>% filter(birthplace2 == '台湾')) -> temp
+china_map2 <- cbind(china_map, temp)
+## 画地图
+china_map2 %>%
+  ggplot()+
+  geom_sf(aes(fill = Mcomply_avg)) +
+  # 加label
+  #geom_sf_label(aes(label = birthplace2))+
+  # 调整颜色
+  scale_fill_gradient(low = '#FFEFD5', high = '#FF6600', na.value = '#D3D3D3')+
+  coord_sf() +
+  theme_bw(base_family = 'STXihei')  +
+  # 换主题
+  # ggthemes::theme_map(base_family = 'STXihei')  +
+  theme(plot.background = element_rect(colour = "transparent", fill = "#fcfcfc"),        
+        legend.background = element_rect(fill = "transparent"),
+        panel.spacing = unit(0, "lines"))
+
+```
+
+# 4 条形图
+```{r}
+temp %>% 
+  filter(!is.na(Mcomply_avg)) %>%
+  arrange(desc(Mcomply_avg)) %>%
+  ggplot2::ggplot(aes(x = reorder(birthplace2, Mcomply_avg), y = scale(Mcomply_avg)+2, fill = Mcomply_avg)) +
+  geom_bar(stat = "identity") +
+  # 加label
+  geom_text(aes(label = round(Mcomply_avg, 2)), nudge_y = 0.25, size = 3) +
+  # 调整颜色
+  scale_fill_gradient(low = '#FFEFD5', high = '#FF6600') +
+  scale_y_continuous(expand = c(0.2, 0)) +
+  coord_flip() +
+  labs(x = '', y = '') +
+  theme_classic(base_family = 'STXihei') +
+  theme(plot.background = element_rect(colour = "transparent", fill = "#fcfcfc"),
+        legend.position="right",
+        axis.text.x = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank())
+```
+
+# 5 地区数据表格（省份、样本量、平均年龄[最小、最大]、男性比例、Mcomply_avg(std) ）
+```{r}
+df %>%
+  group_by(birthplace2) %>%
+  filter(!is.na(Mcomply), birthplace2 != '海外') %>%
+  summarise(n_sample = n(), 
+            age_avg = paste0(round(mean(age, na.rm = T), 2), '[',
+                             min(age, na.rm = T), ',',
+                             max(age, na.rm = T), ']'),
+            # 如果1是男性：sum(2 - gender) ，如果2是男性：gender - 1
+            male_percent = round(sum(2 - gender) / n_sample, 2),
+            Mcomply_avg = paste0(round(mean(Mcomply), 2), '(',
+                                 round(sd(Mcomply), 2), ')')) %>%
+  arrange(desc(Mcomply_avg)) -> temp2
+
+df %>%
+  ungroup() %>%
+  filter(!is.na(Mcomply), birthplace2 != '海外') %>%
+  summarise(birthplace2 = 'total',
+            n_sample = n(), 
+            age_avg = paste0(round(mean(age, na.rm = T), 2), '[',
+                             min(age, na.rm = T), ',',
+                             max(age, na.rm = T), ']'),
+            # 如果1是男性：sum(2 - gender) ，如果2是男性：gender - 1
+            male_percent = round(sum(2 - gender) / n_sample, 2),
+            Mcomply_avg = paste0(round(mean(Mcomply), 2), '(',
+                                 round(sd(Mcomply), 2), ')')) %>%
+  bind_rows(temp2, .) -> temp2
+
+write.xlsx(temp2, '分省汇总结果.xlsx')
+```
+
+
+# 6 计算相关系数
+```{r}
+data <- df %>% 
+  ungroup() %>%
+  select(starts_with('T'))
+
+# vari_list_full <- colnames(data)
+# vari_list_full <- c(sort(vari_list_full[! vari_list_full %in% c('Tcomply', 'Tpes', 'Tpes2', 'Tpes3', 'Tapes', 'Tppes',
+                                                                # 'Ttrsc', 'Ttrst', 'Tac', 'Tau', 'Tal',
+                                                                # 'Tts', 'Tmpes', 'Tdef')]), 'Tcomply')
+vari_list_full <- c("Tanxiety", "Tdepress", "Tfear", "Tlifes", "Tna", 
+                    "Tpa", "Tresilience", "Tsupport","Tpowerd", "Ttight",
+                    "Ttrad", "Tuavoid", "Tcomply")
+
+
+data %<>%
+  select(all_of(vari_list_full))
+
+data %>%
+ `colnames<-`(1:ncol(data)) %>%
+ cor(method = "pearson") %>%
+ as.data.frame() %>%
+ mutate(X = 1:ncol(data)) %>%
+ pivot_longer(1:ncol(data), names_to = "Y", values_to = "cor") %>%
+ mutate(Y = as.numeric(Y)) %>%
+ mutate(cor = ifelse(Y>=X, NA, cor),
+        cor = ifelse(X==1 & Y==1, 1, cor)) %>%
+ mutate(X_lab = vari_list_full[X], Y_lab = vari_list_full[as.numeric(Y)]) %>% #view
+ mutate(X_lab = factor(X_lab, levels = vari_list_full),
+        Y_lab = factor(Y_lab, levels = vari_list_full)) %>%
+ mutate(round = round(cor, 2),
+        round = case_when(round<0 ~ str_pad(round, 5, side = 'right', pad = '0'),
+                          round>0 & round<1 ~ str_pad(round, 4, side = 'right', pad = '0'),
+                          round==0 | round==1 ~ paste0(round, '.00')),
+        label = ifelse(is.na(cor)|X==Y, cor, paste0(round, '**'))) -> temp3
+
+temp3 %>%
+  ggplot(aes(x = factor(X_lab, levels = vari_list_full), y = factor(Y_lab, levels = vari_list_full))) +
+  geom_tile(aes(fill = cor)) +
+  geom_text(aes(label = round), size = 3) +
+  scale_fill_gradient2(name = '', low = '#1E90FF', mid = "#EEEEEE",
+                       high = "#F21A00", midpoint = 0, na.value = 'white', limits = c(-1, 1)) +
+  labs(x = '', y = '') +
+  theme(axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 45, vjust = 0.7),
+        #axis.ticks = element_line(colour = 'transparent'),
+        axis.line = element_line(color = 'black'),
+        panel.background = element_rect(fill = 'white'))
+
+```
+
+# 7 计算与人口学相关系数
+```{r}
+vari_list_full <- c("gender", "age", "ethnic", "faith", "citytype", "singlechild", "SSS", "OSS", "Tcomply")
+
+data <- df %>% 
+  ungroup() %>%
+  select(all_of(vari_list_full))
+
+data %>%
+  `colnames<-`(1:ncol(data)) %>%
+  cor(method = "pearson") %>%
+  as.data.frame() %>%
+  mutate(X = 1:ncol(data)) %>%
+  pivot_longer(1:ncol(data), names_to = "Y", values_to = "cor") %>%
+  mutate(Y = as.numeric(Y)) %>%
+  mutate(cor = ifelse(Y>=X, NA, cor),
+         cor = ifelse(X==1 & Y==1, 1, cor)) %>%
+  mutate(X_lab = vari_list_full[X], Y_lab = vari_list_full[as.numeric(Y)]) %>% #view
+  mutate(X_lab = factor(X_lab, levels = vari_list_full),
+         Y_lab = factor(Y_lab, levels = vari_list_full)) %>%
+  mutate(round = round(cor, 2),
+         round = case_when(round<0 ~ str_pad(round, 5, side = 'right', pad = '0'),
+                           round>0 & round<1 ~ str_pad(round, 4, side = 'right', pad = '0'),
+                           round==0 | round==1 ~ paste0(round, '.00')),
+         label = ifelse(is.na(cor)|X==Y, cor, paste0(round, '**'))) -> temp4
+
+temp4 %>%
+  ggplot(aes(x = factor(X_lab, levels = vari_list_full), y = factor(Y_lab, levels = vari_list_full))) +
+  geom_tile(aes(fill = cor)) +
+  geom_text(aes(label = round), size = 4) +
+  scale_fill_gradient2(name = '', low = '#1E90FF', mid = "#EEEEEE",
+                       high = "#F21A00", midpoint = 0, na.value = 'white', limits = c(-1, 1)) +
+  labs(x = '', y = '') +
+  theme(axis.text = element_text(size = 10),
+        axis.text.x = element_text(angle = 45, vjust = 0.7),
+        #axis.ticks = element_line(colour = 'transparent'),
+        axis.line = element_line(color = 'black'),
+        panel.background = element_rect(fill = 'white'))
+
+```
+
+# 8 合并标准差
+```{r}
+df %>%
+  group_by(birthplace2) %>%
+  filter(!is.na(Mcomply), birthplace2 != '海外') %>%
+  summarise(n_sample = n(), 
+            std = sd(Mcomply)) %>%
+  mutate(x = std^2 * (n_sample-1)) %>%
+  ungroup() %>%
+  summarise(sp = sqrt(sum(x) / (sum(n_sample) - n())) )
+```
+
+# 9 方差分析 显著
+```{r}
+summary(aov(Mcomply~birthplace2, data = df))
+```
+
+```{r}
+prov <- arrange(temp, desc(Mcomply_avg))$birthplace2
+  
+# 用最大的和大家比
+x_prov <- prov[1]
+for (y_prov in prov[prov!=x_prov]) {
+  res <- summary(aov(Mcomply~birthplace2, data = df[df$birthplace2 %in% c(x_prov, y_prov), ]))
+  p_value <- res[[1]]$`Pr(>F)`[1]
+  if (p_value <=0.05)
+    cat(which(prov==y_prov), y_prov, round(temp$Mcomply_avg[temp$birthplace2==y_prov], 2), '\n')
+}
+
+# 用最小的和大家比
+x_prov <- prov[34]
+for (y_prov in prov[prov!=x_prov]) {
+  res <- summary(aov(Mcomply~birthplace2, data = df[df$birthplace2 %in% c(x_prov, y_prov), ]))
+  p_value <- res[[1]]$`Pr(>F)`[1]
+  if (p_value <=0.05)
+    cat(which(prov==y_prov), y_prov, round(temp$Mcomply_avg[temp$birthplace2==y_prov], 2), '\n')
+}
+
+```
+
