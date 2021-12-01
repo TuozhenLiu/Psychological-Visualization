@@ -34,8 +34,6 @@ Data Processing & Visualization scripts for published Psychological papers.
 
 <img src="./Figure/group_histplot1.jpg" width = "800" />
 
-<img src="./Figure/group_histplot2.jpg" width = "800" />
-
 - Violin Plot
 
 <img src="./Figure/violin.png" width = "800" />
