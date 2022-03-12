@@ -20,6 +20,13 @@ Data Processing & Visualization scripts for published Psychological papers.
 
 ![](./Figure/Acknowledgements2.png)
 
+[Prevalence of post-traumatic stress disorder symptoms among patients with mental disorder during the COVID-19 pandemic](https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-022-03790-w#Ack1)
+
+- 2022-03-01 | BMC Psychiatry
+- DOI: https://doi.org/10.1186/s12888-022-03790-w
+
+![](./Figure/Acknowledgements3.png)
+
 [Prevalence of PTSD Symptoms Among Psychiatric Patients During the COVID-19 Pandemic](https://www.researchsquare.com/article/rs-139931/v1)
 
 - 2021-01-07 | Other
